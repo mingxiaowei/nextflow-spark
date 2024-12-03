@@ -1,5 +1,5 @@
 process prepare_spark_work_dir {
-    container = "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
+    container = params.spark_container_name == 'stitching' ? 'docker.io/mingxiaowei/stitching:1.3.0' : "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
     label 'small'
 
     input:
@@ -26,7 +26,7 @@ process prepare_spark_work_dir {
 }
 
 process spark_master {
-    container = "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
+    container = params.spark_container_name == 'stitching' ? 'docker.io/mingxiaowei/stitching:1.3.0' : "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
     label 'small'
 
     input:
@@ -76,7 +76,8 @@ process spark_master {
 }
 
 process wait_for_master {
-    container { "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}" }
+    container { 
+        params.spark_container_name == 'stitching' ? 'docker.io/mingxiaowei/stitching:1.3.0' : "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}" }
     label 'small'
     errorStrategy { task.exitStatus == 2
         ? 'retry' // retry on a timeout to prevent the case when the waiter is started before the master and master never gets its chance
@@ -128,7 +129,7 @@ process wait_for_master {
 }
 
 process spark_worker {
-    container = "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
+    container = params.spark_container_name == 'stitching' ? 'docker.io/mingxiaowei/stitching:1.3.0' : "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
     cpus { worker_cores }
     // 1 GB of overhead for the worker itself, the rest for its executors
     memory "${worker_mem_in_gb+1} GB"
@@ -207,7 +208,7 @@ process spark_worker {
 }
 
 process wait_for_worker {
-    container = "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
+    container = params.spark_container_name == 'stitching' ? 'docker.io/mingxiaowei/stitching:1.3.0' : "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
     label 'small'
     errorStrategy { task.exitStatus == 2
         ? 'retry' // retry on a timeout to prevent the case when the waiter is started before the worker and the worker never gets its chance
@@ -263,7 +264,7 @@ process wait_for_worker {
 }
 
 process spark_start_app {
-    container = "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
+    container = params.spark_container_name == 'stitching' ? 'docker.io/mingxiaowei/stitching:1.3.0' : "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
     cpus { driver_cores == 0 ? 1 : driver_cores }
     memory { driver_memory.replace('k'," KB").replace('m'," MB").replace('g'," GB").replace('t'," TB") }
 
@@ -362,7 +363,7 @@ process spark_start_app {
 }
 
 process terminate_spark {
-    container = "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
+    container = params.spark_container_name == 'stitching' ? 'docker.io/mingxiaowei/stitching:1.3.0' : "${params.spark_container_repo}/${params.spark_container_name}:${params.spark_container_version}"
     label 'small'
 
     input:
